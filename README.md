@@ -5,7 +5,7 @@
 
 Industrial sensor monitoring system. A C++ agent simulates machines on a production line and streams their sensor readings to an ASP.NET Core API, which stores them in PostgreSQL and raises alarms.
 
-> Work in progress: the C++ agent and the API's ingest endpoint are done; PostgreSQL storage, alarms, the dashboard and Docker setup are next.
+> Work in progress: the C++ agent and the API (with PostgreSQL storage) are done; alarms, the dashboard and Docker setup are next.
 
 ## Architecture
 
@@ -54,15 +54,29 @@ Dependencies (nlohmann/json, cpp-httplib, GoogleTest) are used from the system i
 - ASP.NET Core minimal API on .NET 10
 - `POST /api/readings` accepts a batch of readings from an agent (up to 10,000 per request)
 - The whole batch is rejected with a `400 ValidationProblem` if any reading is invalid, listing the problems per reading
-- xUnit unit tests for the validator and integration tests with `WebApplicationFactory`
+- Readings are stored in PostgreSQL with EF Core; each batch is saved in one transaction
+- Database schema is managed with EF Core migrations, applied automatically on startup in Development
+- xUnit tests: unit tests for the validator, endpoint tests with `WebApplicationFactory`, and PostgreSQL tests against a real database started by Testcontainers
 
 ### Build, test and run
 
+Start PostgreSQL (needs Docker):
+
+```bash
+docker run -d --name factorypulse-db -p 5432:5432 \
+  -e POSTGRES_USER=factorypulse -e POSTGRES_PASSWORD=factorypulse -e POSTGRES_DB=factorypulse \
+  postgres:17-alpine
+```
+
+Then:
+
 ```bash
 cd api
-dotnet test
+dotnet test                                                        # PostgreSQL tests need Docker running
 dotnet run --project src/FactoryPulse.Api --launch-profile http   # listens on http://localhost:8080
 ```
+
+The connection string is in `appsettings.json` (`ConnectionStrings:FactoryPulse`) and can be overridden with the `ConnectionStrings__FactoryPulse` environment variable.
 
 With the API running, start the agent without `--dry-run` and it will stream readings to it.
 
@@ -75,7 +89,7 @@ With the API running, start the agent without `--dry-run` and it will stream rea
 
 - [x] C++ sensor agent with unit tests
 - [x] API endpoint that receives and validates readings
-- [ ] PostgreSQL storage with EF Core
+- [x] PostgreSQL storage with EF Core
 - [ ] Alarm rules (LINQ)
 - [ ] Live dashboard
 - [ ] Docker Compose
