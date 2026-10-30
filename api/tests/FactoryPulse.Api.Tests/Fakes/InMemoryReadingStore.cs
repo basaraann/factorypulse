@@ -1,8 +1,9 @@
 using FactoryPulse.Api.Models;
+using FactoryPulse.Api.Storage;
 
-namespace FactoryPulse.Api.Storage;
+namespace FactoryPulse.Api.Tests.Fakes;
 
-/// <summary>Thread-safe store that keeps readings in memory. Nothing survives a restart.</summary>
+/// <summary>Thread-safe in-memory store, used to test the endpoints without a database.</summary>
 public sealed class InMemoryReadingStore : IReadingStore
 {
     private readonly List<Reading> _readings = [];

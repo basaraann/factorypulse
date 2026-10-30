@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using FactoryPulse.Api.Storage;
-using Microsoft.AspNetCore.Mvc.Testing;
+using FactoryPulse.Api.Tests.Fakes;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FactoryPulse.Api.Tests;
@@ -11,7 +11,7 @@ namespace FactoryPulse.Api.Tests;
 public sealed class ReadingEndpointsTests : IDisposable
 {
     // A fresh app per test, so each test starts with an empty store.
-    private readonly WebApplicationFactory<Program> _factory = new();
+    private readonly ApiFactory _factory = new();
     private readonly HttpClient _client;
 
     public ReadingEndpointsTests() => _client = _factory.CreateClient();
