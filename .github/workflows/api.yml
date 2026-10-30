@@ -22,5 +22,12 @@ jobs:
       - name: Build
         run: dotnet build api/FactoryPulse.sln --configuration Release --no-restore
 
+      - name: Check that migrations match the model
+        working-directory: api
+        run: |
+          dotnet tool restore
+          dotnet ef migrations has-pending-model-changes --project src/FactoryPulse.Api --configuration Release --no-build
+
+      # The PostgreSQL tests start a real database with Testcontainers (Docker is available on the runner).
       - name: Test
         run: dotnet test api/FactoryPulse.sln --configuration Release --no-build --logger "console;verbosity=normal"
