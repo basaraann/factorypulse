@@ -1,5 +1,7 @@
 # FactoryPulse
 
+[![agent](https://github.com/basaraann/factorypulse/actions/workflows/agent.yml/badge.svg)](https://github.com/basaraann/factorypulse/actions/workflows/agent.yml)
+
 Industrial sensor monitoring system. A C++ agent simulates machines on a production line and streams their sensor readings to an ASP.NET Core API, which stores them in PostgreSQL and raises alarms.
 
 > Work in progress: the C++ agent is done; the API, dashboard and Docker setup are next.

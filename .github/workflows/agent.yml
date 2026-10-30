@@ -1,0 +1,28 @@
+name: agent
+
+on:
+  push:
+    branches: [main]
+    paths: ["agent/**", ".github/workflows/agent.yml"]
+  pull_request:
+    paths: ["agent/**", ".github/workflows/agent.yml"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libgtest-dev nlohmann-json3-dev libcpp-httplib-dev
+
+      - name: Configure
+        run: cmake -S agent -B agent/build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build agent/build
+
+      - name: Test
+        run: ctest --test-dir agent/build --output-on-failure
