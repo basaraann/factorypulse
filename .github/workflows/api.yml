@@ -1,0 +1,26 @@
+name: api
+
+on:
+  push:
+    paths: ["api/**", ".github/workflows/api.yml"]
+  pull_request:
+    paths: ["api/**", ".github/workflows/api.yml"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore api/FactoryPulse.sln
+
+      - name: Build
+        run: dotnet build api/FactoryPulse.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test api/FactoryPulse.sln --configuration Release --no-build --logger "console;verbosity=normal"

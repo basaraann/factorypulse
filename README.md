@@ -1,10 +1,11 @@
 # FactoryPulse
 
 [![agent](https://github.com/basaraann/factorypulse/actions/workflows/agent.yml/badge.svg)](https://github.com/basaraann/factorypulse/actions/workflows/agent.yml)
+[![api](https://github.com/basaraann/factorypulse/actions/workflows/api.yml/badge.svg)](https://github.com/basaraann/factorypulse/actions/workflows/api.yml)
 
 Industrial sensor monitoring system. A C++ agent simulates machines on a production line and streams their sensor readings to an ASP.NET Core API, which stores them in PostgreSQL and raises alarms.
 
-> Work in progress: the C++ agent is done; the API, dashboard and Docker setup are next.
+> Work in progress: the C++ agent and the API's ingest endpoint are done; PostgreSQL storage, alarms, the dashboard and Docker setup are next.
 
 ## Architecture
 
@@ -48,10 +49,34 @@ Dependencies (nlohmann/json, cpp-httplib, GoogleTest) are used from the system i
 | `--fault-prob P` | `0.02` | Chance of a faulty reading (0–1) |
 | `--dry-run` | off | Print to the console instead of sending |
 
+## API (`api/`)
+
+- ASP.NET Core minimal API on .NET 10
+- `POST /api/readings` accepts a batch of readings from an agent (up to 10,000 per request)
+- The whole batch is rejected with a `400 ValidationProblem` if any reading is invalid, listing the problems per reading
+- xUnit unit tests for the validator and integration tests with `WebApplicationFactory`
+
+### Build, test and run
+
+```bash
+cd api
+dotnet test
+dotnet run --project src/FactoryPulse.Api --launch-profile http   # listens on http://localhost:8080
+```
+
+With the API running, start the agent without `--dry-run` and it will stream readings to it.
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/readings` | Store a batch of readings, returns `{"accepted": n}` |
+| `GET /health` | Liveness check |
+
 ## Roadmap
 
 - [x] C++ sensor agent with unit tests
-- [ ] ASP.NET Core Web API with EF Core + PostgreSQL
-- [ ] Alarm rules (LINQ) and xUnit tests
+- [x] API endpoint that receives and validates readings
+- [ ] PostgreSQL storage with EF Core
+- [ ] Alarm rules (LINQ)
 - [ ] Live dashboard
-- [ ] Docker Compose and GitHub Actions CI
+- [ ] Docker Compose
+- [x] GitHub Actions CI
